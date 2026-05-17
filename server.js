@@ -12,7 +12,7 @@ app.use(cors({
 }));
 
 // ── CONFIG ────────────────────────────────────────────────────
-const CLIENT_ID     = 'FB085F45AFD84EED86CA9292ED855EA7';
+const CLIENT_ID     = '5E197D833633444883E0B870D34C01C6';
 const CLIENT_SECRET = 'hNI0DlIPK4z1Fc0aipAB9VpNIOAQnwbmvrD24LYrAUfmzAuh';
 const REDIRECT_URI  = 'https://davidianconway-alt.github.io/finance-dashboard/';
 
@@ -27,13 +27,12 @@ app.post('/auth/token', async (req, res) => {
     if (!code) return res.status(400).json({ error: 'Missing code' });
 
     const params = new URLSearchParams({
-      grant_type:    'authorization_code',
-      code:           code,
-      redirect_uri:   REDIRECT_URI,
-      client_id:      CLIENT_ID,
-      client_secret:  CLIENT_SECRET,
-      code_verifier:  code_verifier || ''
-    });
+  grant_type:    'authorization_code',
+  code:           code,
+  redirect_uri:   REDIRECT_URI,
+  client_id:      CLIENT_ID,
+  code_verifier:  code_verifier || ''
+});
 
     const response = await fetch('https://identity.xero.com/connect/token', {
       method:  'POST',
