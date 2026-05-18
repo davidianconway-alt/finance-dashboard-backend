@@ -14,16 +14,15 @@ const FRONTEND_URI = '[https://davidianconway-alt.github.io/finance-dashboard/](
 
 // Step A: Kick off the login flow securely from the server side
 app.get('/login', (req, res) => {
-    // 2026 Mandatory Granular Scopes
-    const scopes = 'openid profile email accounting.invoices.read accounting.payments.read accounting.banktransactions.read accounting.manualjournals.read accounting.settings.read accounting.contacts.read';
+    const clientId = process.env.XERO_CLIENT_ID;
+    // Your exact GitHub Pages URL goes here as the redirect URI
+    const redirectUri = 'https://davidianconway-alt.github.io/finance-dashboard/'; 
+    const scope = 'openid profile email accounting.transactions accounting.settings accounting.contacts';
+
+    const authorizationUrl = `https://identity.xero.com/connect/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}`;
     
-    const authorizationUrl = `[https://identity.xero.com/connect/authorize](https://identity.xero.com/connect/authorize)?` + new URLSearchParams({
-        response_type: 'code',
-        client_id: CLIENT_ID,
-        redirect_uri: REDIRECT_URI,
-        scope: scopes,
-        prompt: 'select_account'
-    });
+    res.redirect(authorizationUrl);
+});
     
     res.redirect(authorizationUrl);
 });
