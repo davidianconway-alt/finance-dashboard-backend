@@ -5,9 +5,9 @@
   "scripts": {
     "start": "node server.js"
   },
-  "dependencies": {
-    "express": "^4.19.2",
-    "cors": "^2.8.5",
-    "node-fetch@2": "^2.7.0"
-  }
+ "dependencies": {
+  "cors": "^2.8.5",
+  "express": "^4.19.2",
+  "node-fetch": "^2.7.0"
+}
 }
