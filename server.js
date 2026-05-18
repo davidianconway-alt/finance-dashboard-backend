@@ -3,7 +3,7 @@ const cors = require('cors');
 const fetch = require('node-fetch');
 const app = express();
 
-// Enable CORS so your GitHub Pages frontend can talk to this backend
+// Enable CORS so your GitHub Pages frontend can talk to this backend 
 app.use(cors()); 
 app.use(express.json());
 
