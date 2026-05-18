@@ -24,8 +24,7 @@ app.get('/login', (req, res) => {
     res.redirect(authorizationUrl);
 });
     
-    res.redirect(authorizationUrl);
-});
+    
 
 // Step B: Xero talks directly back to your server here
 app.get('/callback', async (req, res) => {
