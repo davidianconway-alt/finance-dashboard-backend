@@ -1,65 +1,64 @@
-const express  = require('express');
-const cors     = require('cors');
-const fetch    = require('node-fetch');
-
+const express = require('express');
+const cors = require('cors');
+const fetch = require('node-fetch');
 const app = express();
+
+// Enable CORS so your GitHub Pages frontend can talk to this backend
+app.use(cors()); 
 app.use(express.json());
 
-// Allow requests from GitHub Pages frontend
-app.use(cors({
-  origin: 'https://davidianconway-alt.github.io',
-  credentials: true
-}));
+// These will be securely loaded from Render's environment variables
+const CLIENT_ID = process.env.XERO_CLIENT_ID;
+const CLIENT_SECRET = process.env.XERO_CLIENT_SECRET;
 
-// ── CONFIG ────────────────────────────────────────────────────
-const CLIENT_ID     = '5E197D833633444883E0B870D34C01C6';
-const CLIENT_SECRET = 'hNI0DlIPK4z1Fc0aipAB9VpNIOAQnwbmvrD24LYrAUfmzAuh';
-const REDIRECT_URI  = 'https://davidianconway-alt.github.io/finance-dashboard/';
+// ROUTE 1: SECURE TOKEN EXCHANGE
+app.post('/api/token', async (req, res) => {
+  const { code, verifier, redirect_uri } = req.body;
 
-// ── TOKEN EXCHANGE ────────────────────────────────────────────
-// Frontend sends the auth code and PKCE verifier
-// We exchange for tokens server-side (secret never exposed to browser)
-
-app.post('/auth/token', async (req, res) => {
   try {
-    const { code, code_verifier } = req.body;
-
-    if (!code) return res.status(400).json({ error: 'Missing code' });
-
-    const params = new URLSearchParams({
-  grant_type:    'authorization_code',
-  code:           code,
-  redirect_uri:   REDIRECT_URI,
-  client_id:      CLIENT_ID,
-  code_verifier:  code_verifier || ''
-});
-
     const response = await fetch('https://identity.xero.com/connect/token', {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body:    params.toString()
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: redirect_uri,
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET, // Hidden safely on the server
+        code_verifier: verifier
+      })
     });
-
+    
     const data = await response.json();
-
-    if (!response.ok) {
-      console.error('Token exchange error:', data);
-      return res.status(response.status).json(data);
-    }
-
     res.json(data);
-
   } catch (err) {
-    console.error('Token exchange failed:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ── XERO API PROXY ────────────────────────────────────────────
-// Frontend sends the target URL, token and tenantId
-// We make the actual Xero API call and return the result
-
+// ROUTE 2: THE API CORS PROXY
 app.post('/api/xero-proxy', async (req, res) => {
+  const { url, token, tenantId } = req.body;
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Xero-tenant-id': tenantId || '',
+        'Accept': 'application/json'
+      }
+    });
+    
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Start the server on whatever port Render provides, or 3000 locally
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   try {
     const { url, token, tenantId } = req.body;
 
